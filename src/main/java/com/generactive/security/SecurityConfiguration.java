@@ -46,8 +46,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 // configure access rules
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .antMatchers("/home").authenticated()
-                .antMatchers("/groups").authenticated()
-                .antMatchers("/items").authenticated()
+                .antMatchers("/groups/*").authenticated()
+                .antMatchers("/items/*").authenticated()
                 .antMatchers("/admins/*").hasRole("ADMIN")
                 .antMatchers("/users/*").hasAnyRole("USER", "ADMIN")
                 //It's no matter the user has ADMIN or other Role, he must have authority ACCESS_PENTAGON

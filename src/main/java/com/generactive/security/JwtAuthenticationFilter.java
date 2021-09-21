@@ -24,7 +24,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private AuthenticationManager authenticationManager;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
-        super(authenticationManager);
+        this.authenticationManager = authenticationManager;
     }
 
     //Trigger when we issue POST request to /login
