@@ -41,8 +41,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // Create login token (not for user yet, but only for app internal use)
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 credentials.getUsername(),
-                credentials.getPassword(),
-                new ArrayList<>());
+                credentials.getPassword());
 
         // Authenticate user
         Authentication auth = authenticationManager.authenticate(authenticationToken);
