@@ -20,10 +20,6 @@ public class GeneractiveUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         User user = userRepository.findByUsername(username);
-        user.setActive(true);
-        userRepository.save(user);
-        GeneractiveUserDetails userDetails = new GeneractiveUserDetails(user);
-
-        return userDetails;
+        return new GeneractiveUserDetails(user);
     }
 }

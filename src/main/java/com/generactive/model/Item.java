@@ -2,7 +2,7 @@ package com.generactive.model;
 
 
 import javax.persistence.*;
-import javax.persistence.Entity;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity()
@@ -13,7 +13,7 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "item_seq")
     @SequenceGenerator(name = "item_seq", sequenceName = "item_sequence", allocationSize = 1)
-    private long id;
+    private Long id;
 
     @Column(name = "name", unique = true, nullable = false)
     private String name;
@@ -24,18 +24,38 @@ public class Item {
     @Column(name = "base_price")
     private double basePrice = 0.0;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "group_id")
     private Group group;
+
+    @Column(name = "created_date")
+    private LocalDate createdDate;
+
+    @Column(name = "updated_date")
+    private LocalDate updatedDate;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
 
     public Item() {
     }
 
-    public long getId() {
+    @PrePersist
+    public void setCreatedDateAndCreator() {
+        this.createdDate = LocalDate.now();
+    }
+
+    @PreUpdate
+    public void setUpdatedDate() {
+        this.updatedDate = LocalDate.now();
+    }
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -71,11 +91,35 @@ public class Item {
         this.group = group;
     }
 
+    public LocalDate getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDate createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public LocalDate getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(LocalDate updatedDate) {
+        this.updatedDate = updatedDate;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
     public void printContent() {
-        System.out.println("    Item group id: " + this.group.getId());
+        System.out.println("    Item groups id: " + this.group.getId());
         System.out.println("    Item name : " + this.name);
         System.out.println("    Item price : " + this.basePrice);
-        System.out.println("    Item ID : " + this.id);
+        System.out.println("    Item id : " + this.id);
     }
 
     public double calculatePrice(Configuration configuration) {
@@ -91,7 +135,7 @@ public class Item {
                 ", name='" + name + '\'' +
                 ", url='" + url + '\'' +
                 ", basePrice=" + basePrice +
-                ", group=" + group.getName() +
+                ", groups=" + group.getName() +
                 '}';
     }
 
@@ -100,7 +144,7 @@ public class Item {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Item item = (Item) o;
-        return id == item.id &&
+        return Objects.equals(id, item.id) &&
                 Double.compare(item.basePrice, basePrice) == 0 &&
                 Objects.equals(name, item.name) &&
                 Objects.equals(url, item.url) &&
@@ -111,4 +155,5 @@ public class Item {
     public int hashCode() {
         return Objects.hash(id, name, url, basePrice, group.getName());
     }
+
 }

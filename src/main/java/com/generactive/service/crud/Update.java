@@ -1,5 +1,5 @@
 package com.generactive.service.crud;
 
-public interface Update<ID,Request, Response>{
-    Response update(ID id, Request request);
+public interface Update<DTO>{
+    void update(DTO dto);
 }

@@ -5,7 +5,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GeneractiveUserDetails implements UserDetails {
 
@@ -17,13 +19,11 @@ public class GeneractiveUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
 
         //Extract authorities and add them into a set
-        this.user.getAuthorities().stream().forEach(p -> {
-            GrantedAuthority authority = new SimpleGrantedAuthority(p.name());
-            authorities.add(authority);
-        });
+        Set<GrantedAuthority> authorities = user.getAuthorities().stream()
+                .map(a -> new SimpleGrantedAuthority(a.name()))
+                .collect(Collectors.toSet());
 
         //Get role and add it into a set
         GrantedAuthority role = new SimpleGrantedAuthority(this.user.getRole().name());
@@ -59,6 +59,6 @@ public class GeneractiveUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.user.isActive();
+        return user.isEnabled();
     }
 }

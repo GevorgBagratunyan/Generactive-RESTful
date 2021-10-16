@@ -4,7 +4,9 @@ import com.generactive.model.enums.Authority;
 import com.generactive.model.enums.Role;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -13,7 +15,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @Column(name = "username", nullable = false)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     @Column(name = "password", nullable = false)
@@ -28,7 +30,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Set<Authority> authorities = new HashSet<>();
 
-    private boolean isActive = true;
+    @Column(name = "is_enabled")
+    private boolean isEnabled = true;
 
     public User() {
     }
@@ -82,12 +85,12 @@ public class User {
         authorities.remove(authority);
     }
 
-    public boolean isActive() {
-        return isActive;
+    public boolean isEnabled() {
+        return isEnabled;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
     }
 
     @Override

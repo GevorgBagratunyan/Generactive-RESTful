@@ -26,13 +26,13 @@ public class DbInit implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        User user = new User();
-        user.setUsername("Gevorg");
-        user.setPassword(passwordEncoder.encode("123456"));
-        user.setActive(true);
-        user.setRole(Role.ROLE_ADMIN);
-        user.addAuthority(Authority.ACCESS_PENTAGON);
-        userRepository.save(user);
+//        User user = new User();
+//        user.setUsername("Gevorg");
+//        user.setPassword(passwordEncoder.encode("123456"));
+//        user.setEnabled(true);
+//        user.setRole(Role.ROLE_ADMIN);
+//        user.addAuthority(Authority.ACCESS_PENTAGON);
+//        userRepository.save(user);
 
     }
 }

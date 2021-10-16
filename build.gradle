@@ -21,6 +21,7 @@ dependencies {
     implementation group: 'com.auth0', name: 'java-jwt', version: '3.18.2'
     testImplementation group: 'com.h2database', name: 'h2', version: '1.4.194'
     runtimeOnly 'org.postgresql:postgresql'
+    implementation group: 'org.hibernate', name: 'hibernate-validator', version: '6.2.0.Final'
 }
 
 test {

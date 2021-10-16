@@ -7,32 +7,32 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "groups")
-@Table(name = "groups")
 public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "group_seq")
     @SequenceGenerator(name = "group_seq", sequenceName = "group_sequence", allocationSize = 1)
-    private long id;
+    private Long id;
 
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @OneToOne
-    @JoinColumn(name = "parent_group_id")
+    @ManyToOne(targetEntity = Group.class, fetch = FetchType.EAGER)
+    @JoinColumn(name = "parent_id")
     private Group parent;
 
 
-    @OneToMany(mappedBy = "parent")
-    private List<Group> subGroups = new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "group_parent")
+    private final List<Group> subGroups = new ArrayList<>();
 
-    @OneToMany(mappedBy = "group")
-    private List<Item> items = new ArrayList<>();
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    private final List<Item> items = new ArrayList<>();
 
     public Group() {
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -44,7 +44,7 @@ public class Group {
         this.parent = parent;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
@@ -56,6 +56,14 @@ public class Group {
         return parent;
     }
 
+    public List<Group> getSubGroups() {
+        return subGroups;
+    }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
     public void addSubGroup(Group group) {
         subGroups.add(group);
     }
@@ -65,7 +73,7 @@ public class Group {
     }
 
     public void printContent() {
-        System.out.println("Group ID : " + id + "\nName : " + name);
+        System.out.println("Group id : " + id + "\nName : " + name);
         System.out.println("Items in this Group : ");
 
         if (!items.isEmpty()) {
@@ -79,7 +87,7 @@ public class Group {
         if (!subGroups.isEmpty()) {
             for (Group group : subGroups) {
                 System.out.printf("  GROUP - id: {%d} Name: {%s}%n", group.getId(), group.getName());
-                System.out.println("  Items in this group : ");
+                System.out.println("  Items in this groups : ");
                 group.printItems();
             }
         } else System.out.println();
@@ -105,7 +113,7 @@ public class Group {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Group group = (Group) o;
-        return id == group.id && Objects.equals(name, group.name);
+        return Objects.equals(id, group.id) && Objects.equals(name, group.name);
     }
 
     @Override

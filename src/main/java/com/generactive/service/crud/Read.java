@@ -1,6 +1,6 @@
 package com.generactive.service.crud;
 
 
-public interface Read<ID, Response>{
-    Response get(ID id);
+public interface Read<DTO, ID>{
+    DTO get(ID id);
 }

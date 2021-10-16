@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -13,8 +14,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private GeneractiveUserDetailsService userDetailsService;
@@ -26,13 +29,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(daoAuthenticationProvider());
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
         http
                 // remove csrf and state in session, because in JWT we don't need them
                 // the order of antMatchers is important
@@ -47,7 +49,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
                 .antMatchers("/home").authenticated()
                 .antMatchers("/groups/*").authenticated()
-                .antMatchers("/items/*").authenticated()
+                .antMatchers("/items/**").authenticated()
                 .antMatchers("/admins/*").hasRole("ADMIN")
                 .antMatchers("/users/*").hasAnyRole("USER", "ADMIN")
                 //It's no matter the user has ADMIN or other Role, he must have authority ACCESS_PENTAGON
@@ -59,6 +61,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .logoutUrl("/logout")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID");
+
     }
 
 
