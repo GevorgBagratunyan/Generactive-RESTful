@@ -14,6 +14,7 @@ import com.generactive.service.specification.GenericSpecification;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,7 +36,6 @@ public class ItemService implements CRUD<ItemDTO, Long> {
 
     @Override
     public ItemDTO create(ItemDTO itemDTO) {
-
         Item item = new Item();
         BeanUtils.copyProperties(itemDTO, item);
         User user = userRepository.findByUsername(itemDTO.getCreatedBy());

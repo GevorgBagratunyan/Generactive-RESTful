@@ -1,13 +1,10 @@
 package com.generactive.controller;
 
-import com.generactive.security.CurrentUser;
-import com.generactive.security.GeneractiveUserDetails;
 import com.generactive.service.ItemService;
 import com.generactive.service.criteria.ItemSearchCriteria;
 import com.generactive.service.dto.ItemDTO;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,9 +43,9 @@ public class ItemController {
     }
 
     @PostMapping
-    public ItemDTO save(@RequestBody ItemDTO itemDTO) {
-        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        itemDTO.setCreatedBy(username);
+    public ItemDTO save(@RequestBody ItemDTO itemDTO,
+                        @AuthenticationPrincipal UserDetails user) {
+        itemDTO.setCreatedBy(user.getUsername());
         return itemService.create(itemDTO);
     }
 
