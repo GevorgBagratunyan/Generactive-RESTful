@@ -1,5 +1,7 @@
 package com.generactive.service;
 
+import com.generactive.exception.item.ItemNotFoundException;
+import com.generactive.exception.item.ItemSearchIllegalArgumentException;
 import com.generactive.model.Group;
 import com.generactive.model.Item;
 import com.generactive.model.User;
@@ -14,9 +16,9 @@ import com.generactive.service.specification.GenericSpecification;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -49,7 +51,7 @@ public class ItemService implements CRUD<ItemDTO, Long> {
     public ItemDTO get(Long id) {
 
         Item item = itemRepository.findById(id)
-                .orElseThrow(NoSuchElementException::new);
+                .orElseThrow(() -> new ItemNotFoundException(String.valueOf(id)));
         ItemDTO itemDTO = new ItemDTO();
         BeanUtils.copyProperties(item, itemDTO);
         if (item.getGroup() != null) {
@@ -77,18 +79,18 @@ public class ItemService implements CRUD<ItemDTO, Long> {
         String sort = criteria.getSort();
         String orderByFieldName = criteria.getOrderByFieldName();
 
+        validateSearch(criteria);
+
         Sort srt;
         if(sort==null) {
             srt = Sort.by(Sort.Direction.ASC, "id");
         } else if (sort.equalsIgnoreCase("ASC")) {
             srt = Sort.by(Sort.Direction.ASC, orderByFieldName);
-        } else if (sort.equalsIgnoreCase("DESC")) {
+        } else {
             srt = Sort.by(Sort.Direction.DESC, orderByFieldName);
-        } else throw new IllegalArgumentException("Invalid type of sorting, please input ASC or DESC");
+        }
 
         Pageable pageable = new PageableImp(limit, offset, srt);
-
-        GenericSpecification<Item> specification = new GenericSpecification<>(criteria);
 
         List<Item> items = itemRepository.findAll(pageable).getContent();
         return mapToItemDTOs(items);
@@ -104,7 +106,7 @@ public class ItemService implements CRUD<ItemDTO, Long> {
     public ItemDTO getByName(ItemSearchCriteria criteria) {
         String name = criteria.getName();
         Item item = itemRepository.findByName(name)
-                .orElseThrow(NoSuchElementException::new);
+                .orElseThrow(() -> new ItemNotFoundException(String.valueOf(criteria.getId())));
         ItemDTO itemDTO = new ItemDTO();
         BeanUtils.copyProperties(item, itemDTO);
         if (item.getGroup() != null) {
@@ -116,7 +118,7 @@ public class ItemService implements CRUD<ItemDTO, Long> {
 
     public void setGroup(Long itemID, Long groupID) {
         Item item = itemRepository.findById(itemID)
-                .orElseThrow(NoSuchElementException::new);
+                .orElseThrow(() -> new ItemNotFoundException(String.valueOf(itemID)));
         Group group = groupRepository.findById(groupID)
                 .orElseThrow(NoSuchElementException::new);
         item.setGroup(group);
@@ -129,10 +131,39 @@ public class ItemService implements CRUD<ItemDTO, Long> {
         for (Item item : items) {
             ItemDTO itemDTO = new ItemDTO();
             BeanUtils.copyProperties(item, itemDTO);
-            itemDTO.setGroupName(item.getGroup().getName());
+            if(item.getGroup()!=null) {
+                itemDTO.setGroupName(item.getGroup().getName());
+            }
             itemDTOs.add(itemDTO);
         }
 
         return itemDTOs;
+    }
+
+    private void validateSearch(ItemSearchCriteria criteria) {
+
+        Integer limit = criteria.getLimit();
+        Integer offset = criteria.getOffset();
+        String sort = criteria.getSort();
+        String orderByFieldName = criteria.getOrderByFieldName();
+        String message =  "limit = " + limit + ", offset = " + offset +
+                ", sort = " + sort + ", orderByFieldName = " + orderByFieldName;
+
+        if(limit<0 || offset<0 || (!sort.equalsIgnoreCase("ASC") && !sort.equalsIgnoreCase("DESC"))) {
+            throw new ItemSearchIllegalArgumentException(message);
+        }
+
+        //This part of code checks all declared fields in Item.class
+        Field[] fields = Item.class.getDeclaredFields();
+        boolean fieldIsExists = false;
+        for (Field f : fields) {
+            String fieldName = f.getName();
+            if(orderByFieldName.equalsIgnoreCase(fieldName)) {
+                fieldIsExists = true;
+            }
+        }
+        if(!fieldIsExists) {
+            throw new ItemSearchIllegalArgumentException("Field Name : " + orderByFieldName + " DOES NOT EXIST");
+        }
     }
 }
